@@ -1,0 +1,35 @@
+global:
+    motd_path:      "data/motd"
+    log_path:       "data/logs"
+    host_keys:
+        - "data/keys/server_key_rsa"
+    auth_type:      "ad"
+    ldap_server:    "ad.domain.local:389"
+    ldap_domain:    "ad.domain.local"
+    pass_password:  true
+servers:
+    vdev1.ad.domain.local:
+        connect_path:   "vdev1.ad.domain.local:22"
+        host_pubkeys:
+            - "data/pub/vdev1/ssh_host_dsa_key.pub"
+            - "data/pub/vdev1/ssh_host_ecdsa_key.pub"
+            - "data/pub/vdev1/ssh_host_rsa_key.pub"
+    vdev2.ad.domain.local.local:
+        connect_path:   "vdev2.ad.domain.local:22"
+        host_pubkeys:
+            - "data/pub/vdev2/ssh_host_dsa_key.pub"
+            - "data/pub/vdev2/ssh_host_ecdsa_key.pub"
+            - "data/pub/vdev2/ssh_host_rsa_key.pub"
+acls:
+    development:
+        allow_list:
+            - "vdev1.ad.domain.local"
+            - "vdev2.ad.domain.local"
+    admin:
+        allow_list:
+            - "vdev2.ad.domain.local"
+users:
+    user1:
+        acl:    "development"
+    user2:
+        acl:    "admin"
