@@ -1,35 +1,56 @@
 global:
+    ## Display a message of the day to all users, path to plain text file with unix line endings.
     motd_path:      "data/motd"
+    ## Path of directory with which to store all session logs (auth logs go via syslog to /var/log/auth.log or /var/log/secure).
     log_path:       "data/logs"
+    ## Array of private keys to identify the server, one per algorithm.
     host_keys:
         - "data/keys/server_key_rsa"
+    ## User/Pass auth type, currently either "ad" (Active Directory) or "none" (disabled).
     auth_type:      "ad"
+    ## LDAP server path to perform AD auth against.
     ldap_server:    "ad.domain.local:389"
+    ## LDAP domain to user when performing authentication, users in format <username>@ldap_domain
     ldap_domain:    "ad.domain.local"
+    ## Pass through LDAP password to host we are jumping to for auth?
     pass_password:  true
 servers:
+    ## An array of servers that clients can jump to.
     vdev1.ad.domain.local:
+        ## Hostname / IP and port of remote server.
         connect_path:   "vdev1.ad.domain.local:22"
+        ## File paths to public keys that identify that server,
+        ## to enable host integrity validation from an admin standpoint.
         host_pubkeys:
             - "data/pub/vdev1/ssh_host_dsa_key.pub"
             - "data/pub/vdev1/ssh_host_ecdsa_key.pub"
             - "data/pub/vdev1/ssh_host_rsa_key.pub"
-    vdev2.ad.domain.local.local:
+    vdev2.ad.domain.local:
         connect_path:   "vdev2.ad.domain.local:22"
         host_pubkeys:
             - "data/pub/vdev2/ssh_host_dsa_key.pub"
             - "data/pub/vdev2/ssh_host_ecdsa_key.pub"
             - "data/pub/vdev2/ssh_host_rsa_key.pub"
 acls:
+    ## An array of ACLs that allow multiple users to be assigned the same
+    ## list of servers they are allowed to connect to.
     development:
         allow_list:
+            ## Name of server from the "servers" array.
             - "vdev1.ad.domain.local"
             - "vdev2.ad.domain.local"
     admin:
         allow_list:
             - "vdev2.ad.domain.local"
 users:
+    ## Array of users, identified by username.
     user1:
-        acl:    "development"
+        ## ACL of servers the user can connect to, by name from the "ACL" array.
+        acl:                        "development"
+        ## File path to an authorized keys file for the user, in standard format.
+        ## This enabled Public Key authentication for the user.
+        ## Even if this isn't specified, the user can still pass through public key
+        ## authentication to the remote host using ssh-agent forwarding.
+        authorized_keys_file:       "data/users/user1.authorized_keys"
     user2:
         acl:    "admin"
