@@ -1,0 +1,13 @@
+[Unit]
+Description=SSH-BASTION Logging SSH Relay
+
+[Service]
+PIDFile=/var/run/ssh-bastion.pid
+User=bastion
+Group=bastion
+WorkingDirectory=/opt/ssh-bastion
+ExecStart=/bin/bash -c '/opt/ssh-bastion/ssh-bastion -c /opt/ssh-bastion/config.yaml'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
