@@ -42,7 +42,7 @@ func main() {
         panic(err)
     }
 
-    s.ListenAndServe(":2222")
+    s.ListenAndServe(config.Global.ListenPath)
 }
 
 func GetMOTD() (string) {

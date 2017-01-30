@@ -21,6 +21,7 @@ type SSHConfigGlobal struct {
     LDAP_Server             string                          `yaml:"ldap_server"`
     LDAP_Domain             string                          `yaml:"ldap_domain"`
     PassPassword            bool                            `yaml:"pass_password"`
+    ListenPath              string                          `yaml:"listen_path"`
 }
 
 type SSHConfigServer struct {

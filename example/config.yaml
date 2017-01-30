@@ -14,6 +14,11 @@ global:
     ldap_domain:    "ad.domain.local"
     ## Pass through LDAP password to host we are jumping to for auth?
     pass_password:  true
+    ## Listen path for setting up the TCP listener.
+    ## We don't support droping priviledges, so should be greater than 1024,
+    ## so the service can be run as a non-root user.
+    ## You can use iptables NATing to redirect users from port 22.
+    listen_path:    "0.0.0.0:2222"
 servers:
     ## An array of servers that clients can jump to.
     vdev1.ad.domain.local:
