@@ -27,6 +27,7 @@ type SSHConfigGlobal struct {
 type SSHConfigServer struct {
     HostPubKeyFiles         []string                        `yaml:"host_pubkeys"`
     ConnectPath             string                          `yaml:"connect_path"`
+    LoginUser               string                          `yaml:"login_user"`
 }
 
 type SSHConfigACL struct {

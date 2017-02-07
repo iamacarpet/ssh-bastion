@@ -26,6 +26,7 @@ func (s *SSHServer) SessionForward(startTime time.Time, sshConn *ssh.ServerConn,
         sshConn.Close()
         return
     }
+    defer sshConn.Close()
 
     sesschan := NewLogChannel(startTime, rawsesschan, sshConn.User())
 
@@ -53,6 +54,9 @@ func (s *SSHServer) SessionForward(startTime time.Time, sshConn *ssh.ServerConn,
             sesschan.LogRequest(req)
             if req.Type == "auth-agent-req@openssh.com" {
                 agentForwarding = true
+                if req.WantReply {
+                    req.Reply(true, []byte{})
+                }
                 continue
             } else if (req.Type == "pty-req") && (req.WantReply) {
                 req.Reply(true, []byte{})
@@ -112,7 +116,8 @@ func (s *SSHServer) SessionForward(startTime time.Time, sshConn *ssh.ServerConn,
     WriteAuthLog("Connecting to remote for relay (%s) by %s from %s.", remote.ConnectPath, sshConn.User(), sshConn.RemoteAddr())
     fmt.Fprintf(sesschan, "Connecting to %s\r\n", remote_name)
 
-    clientConfig := &ssh.ClientConfig{
+    var clientConfig *ssh.ClientConfig
+    clientConfig = &ssh.ClientConfig{
         User:               sshConn.User(),
         Auth:               []ssh.AuthMethod{
             ssh.PasswordCallback(func() (secret string, err error) {
@@ -121,7 +126,7 @@ func (s *SSHServer) SessionForward(startTime time.Time, sshConn *ssh.ServerConn,
                 } else {
                     //log.Printf("Prompting for password for remote...")
                     t := terminal.NewTerminal(sesschan, "")
-                    s, err := t.ReadPassword(fmt.Sprintf("%s@%s password: ", sshConn.User(), remote_name))
+                    s, err := t.ReadPassword(fmt.Sprintf("%s@%s password: ", clientConfig.User, remote_name))
                     //log.Printf("Got password for remote auth, err: %s", err)
                     return s, err
                 }
@@ -151,6 +156,10 @@ func (s *SSHServer) SessionForward(startTime time.Time, sshConn *ssh.ServerConn,
         },
     }
 
+    if len(remote.LoginUser) > 0 {
+        clientConfig.User = remote.LoginUser
+    }
+
     // Set up the agent
     if agentForwarding {
         agentChan, agentReqs, err := sshConn.OpenChannel("auth-agent@openssh.com", nil)
@@ -173,6 +182,7 @@ func (s *SSHServer) SessionForward(startTime time.Time, sshConn *ssh.ServerConn,
         sesschan.Close()
         return
     }
+    defer client.Close()
     log.Printf("Dialled Remote SSH Successfully...")
 
     // Forward the session channel
