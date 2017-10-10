@@ -18,6 +18,11 @@ func AuthUserPass(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions, err
     if _, ok := config.Users[conn.User()]; ! ok {
         return nil, fmt.Errorf("User Doesn't Exist in Config")
     }
+    
+    if string(password) == "" {
+        // Blank password isn't handled properly by LDAP library, fail here.
+        return nil, fmt.Errorf("Blank Password Not Allowed")
+    }
 
     if config.Global.AuthType == "ad" {
         l, err := ldap.Dial("tcp", config.Global.LDAP_Server)
